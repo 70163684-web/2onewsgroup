@@ -5,12 +5,11 @@ import numpy as np
 
 def load_and_process_corpus(tar_path="20news-bydate.tar.gz"):
     """
-    Robustly extracts architectural properties from the archive file 
-    handling any compression variations cleanly to prevent server crashes.
+    Robust archive parser compatible with pandas==2.2.2 and numpy==1.26.4.
+    Extracts text streams and flags 10 distinct structural attributes cleanly.
     """
     parsed_data = []
     
-    # Attempt parsing with multiple decompression modes fallback
     modes = ["r:gz", "r:", "r|gz"]
     tar = None
     for mode in modes:
@@ -21,7 +20,6 @@ def load_and_process_corpus(tar_path="20news-bydate.tar.gz"):
             continue
             
     if tar is None:
-        # Check fallback local name structure
         try:
             tar = tarfile.open("20news-bydate.tar", "r:")
         except Exception:
@@ -68,7 +66,7 @@ def load_and_process_corpus(tar_path="20news-bydate.tar.gz"):
         
     df = pd.DataFrame(parsed_data)
     
-    # Text Normalization Engineering Pipeline
+    # Text Processing Normalization 
     df['CleanText'] = df['RawText'].str.lower()
     df['CleanText'] = df['CleanText'].apply(lambda x: re.sub(r'[^\w\s]', ' ', str(x))) 
     df['CleanText'] = df['CleanText'].apply(lambda x: re.sub(r'\d+', '', str(x)))      
@@ -76,9 +74,9 @@ def load_and_process_corpus(tar_path="20news-bydate.tar.gz"):
     
     df['WordCount'] = df['CleanText'].apply(lambda x: len(x.split()))
     df['CharCount'] = df['CleanText'].apply(lambda x: len(str(x)))
-    df['AvgWordLength'] = df.apply(lambda row: row['CharCount'] / row['WordCount'] if row['WordCount'] > 0 else 0, axis=1)
+    df['AvgWordLength'] = df.apply(lambda row: row['CharCount'] / row['WordCount'] if row['WordCount'] > 0 else 0.0, axis=1)
     
-    # Explicit 4-Quadrant Partition Strategy
+    # Increased Partitions Matrix
     def segment_partitions(row):
         if row['BaseSplit'] == "Train Split":
             return "Train Split (Standard Vol)" if row['WordCount'] < 250 else "Train Split (Dense Matrix)"
@@ -87,9 +85,9 @@ def load_and_process_corpus(tar_path="20news-bydate.tar.gz"):
             
     df['Split'] = df.apply(segment_partitions, axis=1)
     
-    # Fast Lexicon VADER-inspired Rule Set
-    pos_words = {'good', 'great', 'excellent', 'agree', 'right', 'support', 'true', 'thanks', 'benefit', 'solve', 'perfect'}
-    neg_words = {'bad', 'wrong', 'error', 'fail', 'problem', 'severe', 'claim', 'disagree', 'attack', 'kill', 'hate'}
+    # Lexicon Rules Tagger
+    pos_words = {'good', 'great', 'excellent', 'agree', 'right', 'support', 'true', 'thanks', 'benefit', 'solve'}
+    neg_words = {'bad', 'wrong', 'error', 'fail', 'problem', 'severe', 'claim', 'disagree', 'attack', 'kill'}
     
     def score_sentiment(text):
         tokens = text.split()
