@@ -5,7 +5,7 @@ import seaborn as sns
 import os
 from data_processor import load_and_process_corpus, extract_advanced_vocabulary
 
-# Premium Screen Configuration
+# Premium Layout Configuration
 st.set_page_config(
     page_title="20 Newsgroups Enterprise Visualizer System",
     page_icon="⚡",
@@ -15,25 +15,20 @@ st.set_page_config(
 
 sns.set_theme(style="whitegrid")
 
-# Premium Custom CSS for Scrollable Containers, Fonts, and Grid Blocks
+# Custom Dashboard UI Core Themes
 st.markdown("""
 <style>
     .metric-card { background-color: #F8FAFC; padding: 15px; border-radius: 10px; border-top: 4px solid #1E3A8A; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     .metric-value { font-size: 24px; font-weight: 800; color: #1E3A8A; }
     .metric-title { font-size: 11px; color: #64748B; font-weight: 600; text-transform: uppercase; }
-    
-    /* Scrollable Layout Dataframes Window */
-    .element-container stDataFrame { overflow-x: auto; overflow-y: auto; max-height: 400px; }
-    
-    /* Global scrollbars enhancement styling */
+    .element-container stDataFrame { overflow-x: auto; overflow-y: auto; max-height: 420px; }
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #f1f1f1; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 </style>
 """, unsafe_allow_html=True)
 
-# Dataset dynamic file alignment target detection
+# Dataset target auto-detection matrix
 target_file = "20news-bydate.tar"
 if not os.path.exists(target_file) and os.path.exists("20news-bydate.tar.gz"):
     target_file = "20news-bydate.tar.gz"
@@ -42,14 +37,14 @@ if not os.path.exists(target_file) and os.path.exists("20news-bydate.tar.gz"):
 def get_processed_data(file_path):
     return load_and_process_corpus(file_path)
 
-with st.spinner("Streaming complete dataset from 18,000+ files safely..."):
+with st.spinner("Streaming full dataset from 18,000+ files safely..."):
     master_df = get_processed_data(target_file)
 
 st.markdown("<h1 style='color: #0F172A; font-weight:800; margin-bottom:0;'>⚡ 20 Newsgroups NLP Complete-Dataset Analytics Platform</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color: #64748B; font-size:15px; margin-bottom:25px;'>Premium analytical dashboard system built for massive text corpus analysis, tracking structural file taxonomies, metrics, and trends.</p>", unsafe_allow_html=True)
 
-if master_df.empty:
-    st.error(f"🚨 Data Processing Alert! Core file '{target_file}' could not be accessed dynamically or layout array collapsed.")
+if master_df.empty or "WordCount" not in master_df.columns:
+    st.error(f"🚨 Data Processing Alert! Core file '{target_file}' could not be accessed dynamically.")
 else:
     # --- SIDEBAR FILTERS CONTROL MATRICES ---
     st.sidebar.markdown("### 🛠️ Interactive Workspace Panel")
@@ -65,11 +60,26 @@ else:
     available_categories = ["All Categories"] + sorted(list(step_df['Category'].unique()))
     chosen_category = st.sidebar.selectbox("🎯 Target Content Category Group:", available_categories)
 
-    min_wc, max_wc = int(master_df['WordCount'].min()), int(master_df['WordCount'].max())
-    chosen_word_bounds = st.sidebar.slider("衡量 Document Word Length Limits:", min_value=min_wc, max_value=1500 if max_wc > 1500 else max_wc, value=(min_wc, 600))
+    # SECURE UNLIMITED SLIDER RANGE INITIALIZATION
+    min_wc_val = int(master_df['WordCount'].min()) if len(master_df) > 0 else 0
+    max_wc_val = int(master_df['WordCount'].max()) if len(master_df) > 0 else 10000
+
+    # Force strict order rule compliance checks
+    if min_wc_val >= max_wc_val:
+        min_wc_val = 0
+        max_wc_val = int(max_wc_val + 1000)
+
+    # Dynamic Slider configuration tracking structural counts without maximum caps
+    chosen_word_bounds = st.sidebar.slider(
+        "📏 UNLIMITED Document Word Length Boundaries:",
+        min_value=int(min_wc_val),
+        max_value=int(max_wc_val),
+        value=(int(min_wc_val), int(max_wc_val))
+    )
+
     search_input = st.sidebar.text_input("🔍 Dynamic String Expression Lookup:")
 
-    # Apply Multi-Linked Constraints Framework Pipelines
+    # Apply Filters Pipeline Layout
     filtered_df = step_df.copy()
     if chosen_category != "All Categories":
         filtered_df = filtered_df[filtered_df['Category'] == chosen_category]
@@ -81,10 +91,9 @@ else:
     if search_input:
         filtered_df = filtered_df[filtered_df['CleanText'].str.contains(search_input, case=False)]
 
-    # --- COMPLETE 10 SPECIFIC KPI METRIC POINTS REQUIREMENTS GRID ---
+    # --- COMPLETE 10 SPECIFIC KPI SUMMARY POINTS ---
     st.markdown("### 📊 Enterprise Corpus Statistics Summary")
     
-    # Row 1 (First 5 KPI summary points metrics)
     m_row1_col1, m_row1_col2, m_row1_col3, m_row1_col4, m_row1_col5 = st.columns(5)
     with m_row1_col1:
         st.markdown(f"<div class='metric-card'><div class='metric-value'>{len(master_df):,}</div><div class='metric-title'>1. Total Full Dataset Volume</div></div>", unsafe_allow_html=True)
@@ -101,7 +110,6 @@ else:
 
     st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
 
-    # Row 2 (Remaining 5 KPI summary points metrics)
     m_row2_col1, m_row2_col2, m_row2_col3, m_row2_col4, m_row2_col5 = st.columns(5)
     with m_row2_col1:
         total_lines_val = filtered_df['Lines'].sum() if not filtered_df.empty else 0
@@ -140,7 +148,7 @@ else:
                 plt.tight_layout()
                 st.pyplot(fig1)
             else:
-                st.caption("Empty data arrays configuration.")
+                st.caption("No files matching parameters criteria matrices.")
         with c2:
             st.markdown("##### 🔠 Primary Key Content Tokens Profiles")
             vocab_data = extract_advanced_vocabulary(filtered_df)
@@ -150,7 +158,7 @@ else:
                 plt.tight_layout()
                 st.pyplot(fig2)
             else:
-                st.caption("Insufficient document token distributions array.")
+                st.caption("No semantic token distribution layouts available.")
 
     with tab_stats:
         st.markdown("##### 🧬 Multi-Variate Structural Statistical Modeling Profile")
@@ -159,7 +167,6 @@ else:
             if not filtered_df.empty:
                 fig3, ax3 = plt.subplots(figsize=(8, 4.5))
                 sns.boxplot(data=filtered_df, x='WordCount', y='Category', palette="Set2", ax=ax3)
-                ax3.set_title("Interquartile Distribution and Noise Anomalies Variance Matrix")
                 plt.tight_layout()
                 st.pyplot(fig3)
         with s2:
@@ -169,21 +176,16 @@ else:
                     sns.kdeplot(data=filtered_df, x='WordCount', hue='Category', fill=True, palette="husl", alpha=0.3, ax=ax4)
                 else:
                     sns.kdeplot(data=filtered_df, x='WordCount', fill=True, color="#1D4ED8", alpha=0.4, ax=ax4)
-                ax4.set_title("Probability Frequency Topology Curve Layout (KDE)")
                 plt.tight_layout()
                 st.pyplot(fig4)
 
     with tab_ledger:
         st.markdown("##### 🗃️ Complete Data View Matrix Ledger")
-        st.markdown("Scroll vertically or horizontally inside this data block grid structure to track document vectors directly:")
-        
-        # Enforcing full responsive frame metrics tracking configuration
         st.dataframe(
             filtered_df[['Split', 'Category', 'Subject', 'Lines', 'WordCount', 'AvgWordLength', 'Organization', 'RawText']], 
             use_container_width=True, 
             height=450
         )
 
-# Evaluation syncing footer check signatures
 st.sidebar.markdown("---")
 st.sidebar.info("📌 **Evaluation Matrix Sync:**\n- Full 18,000+ Dataset Active\n- 10 Complete Status Metrics Loaded\n- Charts and Data Tables Wrapped to Scrollable Layout View Grid Matrices")
