@@ -60,14 +60,14 @@ def apply_filters(df, selected_categories, length_range, score_range, search_que
     if selected_categories and 'newsgroup' in filtered_df.columns:
         filtered_df = filtered_df[filtered_df['newsgroup'].isin(selected_categories)]
         
-    # Text Length Filter
+    # Text Length Filter (0 se standard start hone wala)
     if 'text_length' in filtered_df.columns:
         filtered_df = filtered_df[
             (filtered_df['text_length'] >= length_range[0]) & 
             (filtered_df['text_length'] <= length_range[1])
         ]
         
-    # Sentiment Score Filter
+    # Sentiment Score Filter (-1.0 se +1.0)
     if 'sentiment_score' in filtered_df.columns:
         filtered_df = filtered_df[
             (filtered_df['sentiment_score'] >= score_range[0]) & 
