@@ -1,15 +1,15 @@
 import tarfile
 import re
 import pandas as pd
+import numpy as np
 
 def load_and_process_corpus(tar_path="20news-bydate.tar"):
     """
-    Highly secure streaming archive parser. Robustly extracts structural properties 
-    and handles files missing metadata cleanly to guarantee zero crashes.
+    Highly secure streaming archive parser. Robustly extracts structural properties,
+    and dynamically increases data partitions for deep academic visualization workflows.
     """
     parsed_data = []
     
-    # Secure stream fallbacks tracking
     try:
         tar = tarfile.open(tar_path, "r:")
     except Exception:
@@ -19,7 +19,7 @@ def load_and_process_corpus(tar_path="20news-bydate.tar"):
             try:
                 tar = tarfile.open("20news-bydate.tar.gz", "r:gz")
             except Exception:
-                return pd.DataFrame(columns=["Split", "Category", "Subject", "Lines", "Organization", "RawText", "CleanText", "WordCount", "CharCount", "AvgWordLength", "SentimentScore"])
+                return pd.DataFrame(columns=["Split", "Category", "Subject", "Lines", "Organization", "RawText", "CleanText", "WordCount", "CharCount", "AvgWordLength", "SentimentScore", "LinguisticPartition"])
 
     try:
         for member in tar.getmembers():
@@ -33,7 +33,6 @@ def load_and_process_corpus(tar_path="20news-bydate.tar"):
                     if f is not None:
                         raw_content = f.read().decode('utf-8', errors='ignore')
                         
-                        # High-grade safe conditional RegEx engine
                         subject_search = re.search(r'^Subject:\s*(.*)$', raw_content, re.MULTILINE | re.IGNORECASE)
                         lines_search = re.search(r'^Lines:\s*(\d+)$', raw_content, re.MULTILINE | re.IGNORECASE)
                         org_search = re.search(r'^Organization:\s*(.*)$', raw_content, re.MULTILINE | re.IGNORECASE)
@@ -46,7 +45,7 @@ def load_and_process_corpus(tar_path="20news-bydate.tar"):
                         clean_body = raw_content[header_boundary:].strip() if header_boundary != -1 else raw_content
                         
                         parsed_data.append({
-                            "Split": split_type,
+                            "BaseSplit": split_type,
                             "Category": news_category,
                             "Subject": email_subject,
                             "Lines": total_lines,
@@ -58,22 +57,32 @@ def load_and_process_corpus(tar_path="20news-bydate.tar"):
         pass
 
     if not parsed_data:
-        return pd.DataFrame(columns=["Split", "Category", "Subject", "Lines", "Organization", "RawText", "CleanText", "WordCount", "CharCount", "AvgWordLength", "SentimentScore"])
+        return pd.DataFrame(columns=["Split", "Category", "Subject", "Lines", "Organization", "RawText", "CleanText", "WordCount", "CharCount", "AvgWordLength", "SentimentScore", "LinguisticPartition"])
         
     df = pd.DataFrame(parsed_data)
     
-    # Data Cleaning and Preprocessing Pipeline (Pandas & Strings)
+    # Text Data Cleaning Pipeline
     df['CleanText'] = df['RawText'].str.lower()
     df['CleanText'] = df['CleanText'].apply(lambda x: re.sub(r'[^\w\s]', ' ', str(x))) 
     df['CleanText'] = df['CleanText'].apply(lambda x: re.sub(r'\d+', '', str(x)))      
     df['CleanText'] = df['CleanText'].apply(lambda x: re.sub(r'\s+', ' ', str(x)).strip())
     
-    # Feature Metrics Generation
+    # Statistical Vector Matrix Calculations
     df['WordCount'] = df['CleanText'].apply(lambda x: len(x.split()))
     df['CharCount'] = df['CleanText'].apply(lambda x: len(x))
     df['AvgWordLength'] = df.apply(lambda row: row['CharCount'] / row['WordCount'] if row['WordCount'] > 0 else 0, axis=1)
     
-    # Custom Rule-Based NLP Sentiment Tagger
+    # --- INCREASED DATASET PARTITIONS CORE ENGINE ---
+    # Standard splits ko dynamic analytical partitions (4 logical quadrants) mein upgrade kar diya hai
+    def segment_partitions(row):
+        if row['BaseSplit'] == "Train Split":
+            return "Train (Standard Vol)" if row['WordCount'] < 250 else "Train (Dense Matrix)"
+        else:
+            return "Test (Standard Vol)" if row['WordCount'] < 250 else "Test (Dense Matrix)"
+            
+    df['Split'] = df.apply(segment_partitions, axis=1)
+    
+    # Rule-Based NLP Sentiment Tagger
     pos_words = {'good', 'great', 'excellent', 'agree', 'right', 'support', 'true', 'thanks', 'benefit', 'solve'}
     neg_words = {'bad', 'wrong', 'error', 'fail', 'problem', 'severe', 'claim', 'disagree', 'attack', 'kill'}
     
@@ -88,7 +97,7 @@ def load_and_process_corpus(tar_path="20news-bydate.tar"):
     return df[df['WordCount'] >= 1].reset_index(drop=True)
 
 def extract_advanced_vocabulary(df):
-    """Safely extracts top tokens frequency for high-quality dashboard plotting."""
+    """Safely isolates primary active token counts for individual metrics visualization boxes."""
     if df.empty or 'CleanText' not in df.columns:
         return pd.DataFrame(columns=['Word', 'Frequency'])
         
@@ -98,11 +107,10 @@ def extract_advanced_vocabulary(df):
     }
     
     token_frequencies = {}
-    for passage in df['CleanText'].head(1500):  
+    for passage in df['CleanText'].head(1200):  
         tokens = str(passage).split()
         for token in tokens:
             if token not in base_stopwords and len(token) > 4:
                 token_frequencies[token] = token_frequencies.get(token, 0) + 1
                 
-    sorted_tokens = sorted(token_frequencies.items(), key=lambda x: x[1], reverse=True)
-    return pd.DataFrame(sorted_tokens, columns=['Word', 'Frequency']).head(15)
+    return pd.DataFrame(sorted(token_frequencies.items(), key=lambda x: x[1], reverse=True), columns=['Word', 'Frequency']).head(10)
