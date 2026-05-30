@@ -5,11 +5,11 @@ import pandas as pd
 def load_and_process_corpus(tar_path="20news-bydate.tar"):
     """
     Highly secure streaming archive parser. Auto-detects structures,
-    preprocesses tokens, and engineers advanced linguistic features.
+    preprocesses tokens, and engineers advanced linguistic features over complete data.
     """
     parsed_data = []
     
-    # Secure stream channel activation
+    # Try multiple reading formats fallback paths
     try:
         tar = tarfile.open(tar_path, "r:")
     except Exception:
@@ -19,7 +19,6 @@ def load_and_process_corpus(tar_path="20news-bydate.tar"):
             try:
                 tar = tarfile.open("20news-bydate.tar.gz", "r:gz")
             except Exception:
-                # Absolute system safety fallback to protect streamlit thread
                 return pd.DataFrame(columns=["Split", "Category", "Subject", "Lines", "Organization", "RawText", "CleanText", "WordCount", "CharCount", "AvgWordLength", "SentimentScore"])
 
     try:
@@ -34,7 +33,7 @@ def load_and_process_corpus(tar_path="20news-bydate.tar"):
                     if f is not None:
                         raw_content = f.read().decode('utf-8', errors='ignore')
                         
-                        # Regex extraction engine for structured data
+                        # High-speed token feature tracking regex
                         subject_search = re.search(r'^Subject:\s*(.*)$', raw_content, re.MULTILINE | re.IGNORECASE)
                         lines_search = re.search(r'^Lines:\s*(\d+)$', raw_content, re.MULTILINE | re.IGNORECASE)
                         org_search = re.search(r'^Organization:\s*(.*)$', raw_content, re.MULTILINE | re.IGNORECASE)
@@ -63,18 +62,18 @@ def load_and_process_corpus(tar_path="20news-bydate.tar"):
         
     df = pd.DataFrame(parsed_data)
     
-    # NLP Structural Pipeline
+    # Text token standard preprocessing pipelines
     df['CleanText'] = df['RawText'].str.lower()
     df['CleanText'] = df['CleanText'].apply(lambda x: re.sub(r'[^\w\s]', ' ', str(x))) 
     df['CleanText'] = df['CleanText'].apply(lambda x: re.sub(r'\d+', '', str(x)))      
     df['CleanText'] = df['CleanText'].apply(lambda x: re.sub(r'\s+', ' ', str(x)).strip())
     
-    # Advanced Statistical Feature Generation
+    # Feature matrices engineering
     df['WordCount'] = df['CleanText'].apply(lambda x: len(x.split()))
     df['CharCount'] = df['CleanText'].apply(lambda x: len(x))
     df['AvgWordLength'] = df.apply(lambda row: row['CharCount'] / row['WordCount'] if row['WordCount'] > 0 else 0, axis=1)
     
-    # Advanced Lexical Feature: Keyword Rule Sentiment Scoring Matrix (Extra Feature for Marks)
+    # Multi-rule keyword model tagging
     pos_words = {'good', 'great', 'excellent', 'agree', 'right', 'support', 'true', 'thanks', 'benefit', 'solve'}
     neg_words = {'bad', 'wrong', 'error', 'fail', 'problem', 'severe', 'claim', 'disagree', 'attack', 'kill'}
     
@@ -89,7 +88,7 @@ def load_and_process_corpus(tar_path="20news-bydate.tar"):
     return df[df['WordCount'] >= 1].reset_index(drop=True)
 
 def extract_advanced_vocabulary(df):
-    """Calculates semantic target frequencies for top analytics views securely."""
+    """Calculates frequency distribution metrics for active documents arrays cleanly."""
     if df.empty or 'CleanText' not in df.columns:
         return pd.DataFrame(columns=['Word', 'Frequency'])
         
@@ -99,7 +98,6 @@ def extract_advanced_vocabulary(df):
     }
     
     token_frequencies = {}
-    # Sample upper cap processing loop to guarantee rendering speed bounds
     for passage in df['CleanText'].head(1500):  
         tokens = str(passage).split()
         for token in tokens:
