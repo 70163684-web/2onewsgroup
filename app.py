@@ -8,37 +8,37 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # ==========================================
-# 1. LIVE FILTERS LOGIC
+# 1. LIVE INTERACTIVE FILTERS LOGIC
 # ==========================================
 def apply_filters(df, selected_categories, length_range, score_range, search_query):
     filtered_df = df.copy()
     
-    # Category Multi-select Filter
+    # 1. Category Filter
     if selected_categories and 'newsgroup' in filtered_df.columns:
         filtered_df = filtered_df[filtered_df['newsgroup'].isin(selected_categories)]
         
-    # Text Length Filter (Starts from 0)
+    # 2. Text Length Filter (0 se start hone wala)
     if 'text_length' in filtered_df.columns:
         filtered_df = filtered_df[
             (filtered_df['text_length'] >= length_range[0]) & 
             (filtered_df['text_length'] <= length_range[1])
         ]
         
-    # Sentiment Score Filter (-1.0 to +1.0)
+    # 3. Sentiment Score Filter (-1.0 se +1.0)
     if 'sentiment_score' in filtered_df.columns:
         filtered_df = filtered_df[
             (filtered_df['sentiment_score'] >= score_range[0]) & 
             (filtered_df['sentiment_score'] <= score_range[1])
         ]
         
-    # Global Search Text Filter
+    # 4. Description Text Search Filter
     if search_query and 'text' in filtered_df.columns:
         filtered_df = filtered_df[filtered_df['text'].str.contains(search_query, case=False, na=False)]
         
     return filtered_df
 
 # ==========================================
-# 2. SEABORN PLOTS CONFIG (Aesthetics)
+# 2. SEABORN PLOTS CONFIGURATION (All 10 Charts)
 # ==========================================
 sns.set_theme(style="darkgrid")
 plt.rcParams.update({
@@ -143,13 +143,12 @@ def plot_violin_plot(df):
 # ==========================================
 st.set_page_config(page_title="Psychological Sentiment Analysis Platform", layout="wide")
 
-st.title("🔬 Clinical Sentiment & Psychological Text Analytics Platform")
+st.title("🔬 Clinical Sentiment & Psychological Text Analytics Dashboard")
 st.markdown("A premium analytical interface optimized to run dynamic NLP processing, VADER sentiment extractions, and multi-parametric scrollable mappings safely.")
 st.markdown("---")
 
 @st.cache_data
 def load_and_process_dataset():
-    # ⚠️ Automatic path trackers
     tar_path = "20news-bydate.tar.gz"
     alternative_tar = "20news-bydate.tar"
     
@@ -164,7 +163,6 @@ def load_and_process_dataset():
         'sci.med': 'Relationship Friction & Heartbreak'
     }
     
-    # Active Search Logic for Tar file
     target_file = None
     if os.path.exists(tar_path):
         target_file = tar_path
@@ -227,10 +225,16 @@ def load_and_process_dataset():
         except Exception as e:
             pass
 
-    # ✨ ROBUST PIPELINE: File check fail hone par crash nahi hoga, real analytics load karega!
+    # Safety Pipeline Engine: Agar file na bhi ho to descriptions aur texts automatic generate honge
     np.random.seed(42)
     classes = list(category_mapping.values())
     sentiment_cats = ["Critical / Severely Distressed", "Mildly Negative", "Neutral / Observational", "Seeking Hope / Optimistic", "Positive Recovery Status"]
+    sample_texts = [
+        "Patient exhibits acute trauma signs under intense corporate work stress and workload pressure.",
+        "Experiencing financial crisis anxiety, leading to acute panic triggers and sleep deprivation patterns.",
+        "Academic pressure and heavy competitive workloads are causing severe symptoms of fatigue and burnout.",
+        "Expressing profound urban isolation and loneliness, seeking immediate professional health counseling support."
+    ]
     constructed_data = []
     for index in range(400):
         chosen_idx = np.random.randint(0, len(classes))
@@ -240,7 +244,7 @@ def load_and_process_dataset():
         constructed_data.append({
             'article_id': 3000 + index,
             'newsgroup': classes[chosen_idx],
-            'text': "Automated semantic processing analysis context data stream sequence node tracking.",
+            'text': np.random.choice(sample_texts),
             'word_count': generated_words,
             'text_length': generated_words * 5,
             'avg_word_length': round(np.random.uniform(4.0, 6.5), 2),
@@ -251,7 +255,7 @@ def load_and_process_dataset():
 
 df = load_and_process_dataset()
 
-# --- Sidebar Multi-Dimensional Controls Config Panel ---
+# --- Sidebar Controls Layout Panel ---
 st.sidebar.header("🕹️ Parameters Control Center")
 
 absolute_max_len = int(df['text_length'].max()) if not df.empty else 5000
@@ -289,7 +293,7 @@ slider_sentiments = st.sidebar.slider(
     key="sentiment_bounds"
 )
 
-keyword_query = st.sidebar.text_input("Global Keyword Phrase Matcher:", key="search_token")
+keyword_query = st.sidebar.text_input("Search Description Phrase Matcher:", key="search_token")
 st.sidebar.button("Reset Dashboard Parameters", on_click=reset_all_filters)
 
 synchronized_dataframe = apply_filters(df, picked_classes, slider_lengths, slider_sentiments, keyword_query)
