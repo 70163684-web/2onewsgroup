@@ -11,7 +11,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 # ==========================================
-# 1. PAGE CONFIG & PREMIUM DARK THEME CSS
+# 1. PAGE CONFIG & MODERN DARK THEME CSS
 # ==========================================
 st.set_page_config(
     page_title="Psychological Sentiment & Revenue Intelligence", 
@@ -276,8 +276,9 @@ with tab1:
     else:
         col1, col2 = st.columns(2)
         with col1:
-            # 1. Pie Chart (Plotly Donut - ZOOMABLE)
-            pie_data = filtered_df['newsgroup'].value_counts().reset_index()
+            # 1. Pie Chart (Plotly Donut - ZOOMABLE & VERSION COMPATIBLE)
+            counts_series = filtered_df['newsgroup'].value_counts()
+            pie_data = pd.DataFrame({'newsgroup': counts_series.index, 'count': counts_series.values})
             fig_pie = px.pie(pie_data, values='count', names='newsgroup', hole=0.4, title="1. Proportional Group Sharing Scale (Donut Chart)")
             fig_pie.update_layout(template="plotly_dark", paper_bgcolor="#161b22", plot_bgcolor="#161b22")
             st.plotly_chart(fig_pie, use_container_width=True)
@@ -381,7 +382,7 @@ with tab2:
             st.plotly_chart(fig_scatter, use_container_width=True)
             st.markdown("---")
             
-            # 7. Heatmap (Plotly - FULLY ZOOMABLE)
+            # 7. Heatmap (Plotly - FULLY ZOOMABLE & VERSION COMPATIBLE)
             st.markdown("#### 7. Multi-Parametric Feature Inter-Correlation Matrix (Heatmap)")
             numeric_cols = ['word_count', 'text_length', 'avg_word_length', 'sentiment_score', 'simulated_revenue']
             if len(filtered_df) > 1:
@@ -401,9 +402,10 @@ with tab2:
             st.plotly_chart(fig_line, use_container_width=True)
             st.markdown("---")
             
-            # 9. Domain Post Density (Plotly - FULLY ZOOMABLE)
+            # 9. Domain Post Density (Plotly - FULLY ZOOMABLE & VERSION COMPATIBLE)
             st.markdown("#### 9. Domain Post Density Distribution Map (Count Plot)")
-            count_data = filtered_df['newsgroup'].value_counts().reset_index()
+            cg_counts = filtered_df['newsgroup'].value_counts()
+            count_data = pd.DataFrame({'newsgroup': cg_counts.index, 'count': cg_counts.values})
             fig_count = px.bar(count_data, x='count', y='newsgroup', orientation='h', color='newsgroup', title="Category density comparisons")
             fig_count.update_layout(template="plotly_dark", paper_bgcolor="#161b22", plot_bgcolor="#161b22", showlegend=False)
             st.plotly_chart(fig_count, use_container_width=True)
