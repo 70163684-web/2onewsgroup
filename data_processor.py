@@ -19,7 +19,7 @@ def load_and_process_corpus(tar_path="20news-bydate.tar"):
             try:
                 tar = tarfile.open("20news-bydate.tar.gz", "r:gz")
             except Exception:
-                return pd.DataFrame()
+                return pd.DataFrame(columns=["Split", "Category", "Subject", "Lines", "Organization", "RawText", "CleanText", "WordCount", "CharCount", "AvgWordLength"])
 
     try:
         for member in tar.getmembers():
@@ -58,7 +58,7 @@ def load_and_process_corpus(tar_path="20news-bydate.tar"):
         pass
 
     if not parsed_data:
-        return pd.DataFrame()
+        return pd.DataFrame(columns=["Split", "Category", "Subject", "Lines", "Organization", "RawText", "CleanText", "WordCount", "CharCount", "AvgWordLength"])
         
     df = pd.DataFrame(parsed_data)
     
@@ -73,21 +73,25 @@ def load_and_process_corpus(tar_path="20news-bydate.tar"):
     df['CharCount'] = df['CleanText'].apply(lambda x: len(x))
     df['AvgWordLength'] = df.apply(lambda row: row['CharCount'] / row['WordCount'] if row['WordCount'] > 0 else 0, axis=1)
     
-    return df[df['WordCount'] > 2].reset_index(drop=True)
+    # Keep true files to ensure dynamic calculations match
+    return df[df['WordCount'] >= 1].reset_index(drop=True)
 
 def extract_advanced_vocabulary(df):
-    """Dynamically parses the vocabulary counts for chart widgets."""
+    """Dynamically parses the vocabulary counts for chart widgets securely."""
     if df.empty or 'CleanText' not in df.columns:
         return pd.DataFrame(columns=['Word', 'Frequency'])
         
     base_stopwords = {
         'the', 'and', 'of', 'to', 'is', 'in', 'for', 'on', 'with', 'a', 'an', 'this', 'are', 
-        'or', 'at', 'from', 'it', 'that', 'by', 'be', 'as', 'was', 'have', 'not', 'but', 'you', 'i', 'he', 'they', 'isnt', 'wasnt'
+        'or', 'at', 'from', 'it', 'that', 'by', 'be', 'as', 'was', 'have', 'not', 'but', 'you', 'i', 'he', 'they'
     }
     
     token_frequencies = {}
-    for passage in df['CleanText'].head(1000):  # Sub-sampled tracking for speed optimization in layout
+    for passage in df['CleanText'].head(1200):  
         tokens = str(passage).split()
         for token in tokens:
             if token not in base_stopwords and len(token) > 4:
                 token_frequencies[token] = token_frequencies.get(token, 0) + 1
+                
+    sorted_tokens = sorted(token_frequencies.items(), key=lambda x: x[1], reverse=True)
+    return pd.DataFrame(sorted_tokens, columns=['Word', 'Frequency']).head(15)
