@@ -2,46 +2,61 @@ import tarfile
 import re
 import pandas as pd
 
-def load_and_process_corpus(tar_path="20news-bydate.tar.gz"):
+def load_and_process_corpus(tar_path="20news-bydate.tar"):
     """
-    Directly streams and extracts the archive in memory to comply with the 
-    'no renaming/no external dependency' evaluation guidelines.
+    Directly streams and extracts the archive in memory.
+    Automatically handles both compressed (.tar.gz) and uncompressed (.tar) formats.
     """
     parsed_data = []
     
+    # Pehle try karein standard tar mode ('r:'), agar fail ho toh compressed mode ('r:gz') use karein
     try:
-        with tarfile.open(tar_path, "r:gz") as tar:
-            for member in tar.getmembers():
-                # Read from both subsets automatically
-                if member.isfile() and ("20news-bydate-train" in member.name or "20news-bydate-test" in member.name):
-                    path_segments = member.name.split('/')
-                    if len(path_segments) >= 3:
-                        split_type = "Train Split" if "train" in path_segments[0] else "Test Split"
-                        news_category = path_segments[1]
+        tar = tarfile.open(tar_path, "r:")
+    except Exception:
+        try:
+            tar = tarfile.open(tar_path, "r:gz")
+        except Exception as e:
+            # Agar file name badla hua ho (e.g. tar.gz), toh check karein
+            if "tar.gz" in tar_path or "gz" in str(e):
+                tar = tarfile.open("20news-bydate.tar.gz", "r:gz")
+            else:
+                return pd.DataFrame(columns=["Split", "Category", "Subject", "RawText", "CleanText", "WordCount", "CharCount"])
+
+    try:
+        for member in tar.getmembers():
+            # Read from both train and test subsets automatically
+            if member.isfile() and ("20news-bydate-train" in member.name or "20news-bydate-test" in member.name):
+                path_segments = member.name.split('/')
+                if len(path_segments) >= 3:
+                    split_type = "Train Split" if "train" in path_segments[0] else "Test Split"
+                    news_category = path_segments[1]
+                    
+                    f = tar.extractfile(member)
+                    if f is not None:
+                        raw_content = f.read().decode('utf-8', errors='ignore')
                         
-                        f = tar.extractfile(member)
-                        if f is not None:
-                            raw_content = f.read().decode('utf-8', errors='ignore')
-                            
-                            # Advanced structural feature separation
-                            subject_search = re.search(r'^Subject:\s*(.*)$', raw_content, re.MULTILINE | re.IGNORECASE)
-                            email_subject = subject_search.group(1).strip() if subject_search else "Untitled Document"
-                            
-                            # Clean institutional headers boundary split
-                            header_boundary = raw_content.find('\n\n')
-                            clean_body = raw_content[header_boundary:].strip() if header_boundary != -1 else raw_content
-                            
-                            parsed_data.append({
-                                "Split": split_type,
-                                "Category": news_category,
-                                "Subject": email_subject,
-                                "RawText": clean_body
-                            })
-    except FileNotFoundError:
-        # Emergency backup layout tracker if the file path drops
-        return pd.DataFrame(columns=["Split", "Category", "Subject", "RawText", "CleanText", "WordCount", "CharCount"])
+                        # Structural feature separation using Regex
+                        subject_search = re.search(r'^Subject:\s*(.*)$', raw_content, re.MULTILINE | re.IGNORECASE)
+                        email_subject = subject_search.group(1).strip() if subject_search else "Untitled Document"
+                        
+                        # Clean institutional headers boundary split
+                        header_boundary = raw_content.find('\n\n')
+                        clean_body = raw_content[header_boundary:].strip() if header_boundary != -1 else raw_content
+                        
+                        parsed_data.append({
+                            "Split": split_type,
+                            "Category": news_category,
+                            "Subject": email_subject,
+                            "RawText": clean_body
+                        })
+        tar.close()
+    except Exception:
+        pass
 
     # DataFrame construction
+    if not parsed_data:
+        return pd.DataFrame(columns=["Split", "Category", "Subject", "RawText", "CleanText", "WordCount", "CharCount"])
+        
     df = pd.DataFrame(parsed_data)
     
     # Text Token Analysis Pipeline
