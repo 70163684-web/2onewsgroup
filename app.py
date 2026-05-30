@@ -139,11 +139,16 @@ def load_and_process_dataset():
                                 sentiment = (pos_c - neg_c) / (pos_c + neg_c + 1)
                                 sentiment = max(-1.0, min(1.0, sentiment))
                                 
-                                if sentiment <= -0.4: cat = "Critical Distress"
-                                elif sentiment <= -0.1: cat = "Mildly Negative"
-                                elif sentiment <= 0.2: cat = "Neutral / Observational"
-                                elif sentiment <= 0.5: cat = "Seeking Hope / Optimistic"
-                                else: cat = "Positive Recovery Status"
+                                if sentiment <= -0.4: 
+                                    cat = "Critical Distress"
+                                elif sentiment <= -0.1: 
+                                    cat = "Mildly Negative"
+                                elif sentiment <= 0.2: 
+                                    cat = "Neutral / Observational"
+                                elif sentiment <= 0.5: 
+                                    cat = "Seeking Hope / Optimistic"
+                                else: 
+                                    cat = "Positive Recovery Status"
                                 
                                 all_data.append({
                                     'article_id': int(file_id) if file_id.isdigit() else np.random.randint(1000, 5000),
@@ -278,7 +283,7 @@ with tab1:
         with col1:
             # 1. Pie Chart (Plotly Donut - ZOOMABLE & VERSION COMPATIBLE)
             counts_series = filtered_df['newsgroup'].value_counts()
-            pie_data = pd.DataFrame({'newsgroup': counts_series.index, 'count': counts_series.values})
+            pie_data = pd.DataFrame({'newsgroup': counts_series.index.tolist(), 'count': counts_series.values.tolist()})
             fig_pie = px.pie(pie_data, values='count', names='newsgroup', hole=0.4, title="1. Proportional Group Sharing Scale (Donut Chart)")
             fig_pie.update_layout(template="plotly_dark", paper_bgcolor="#161b22", plot_bgcolor="#161b22")
             st.plotly_chart(fig_pie, use_container_width=True)
@@ -325,6 +330,7 @@ with tab2:
             sns.boxplot(data=filtered_df, x='sentiment_score', y='newsgroup', ax=ax_box, palette="Set2")
             ax_box.set_title("5. Emotional Dispersion Variance Bounds (Seaborn Static Boxplot)", color="white")
             st.pyplot(fig_box_seaborn)
+            plt.close(fig_box_seaborn)
             st.markdown("---")
             
             # Scatterplot Seaborn (MANDATORY FOR GRADING)
@@ -332,6 +338,7 @@ with tab2:
             sns.scatterplot(data=filtered_df, x='word_count', y='sentiment_score', hue='newsgroup', ax=ax_sc, palette="viridis")
             ax_sc.set_title("6. Bivariate Demographic Scale Layout (Seaborn Scatter)", color="white")
             st.pyplot(fig_scatter_seaborn)
+            plt.close(fig_scatter_seaborn)
             st.markdown("---")
             
             # Heatmap Seaborn (MANDATORY FOR GRADING)
@@ -341,6 +348,7 @@ with tab2:
             sns.heatmap(corr_m, annot=True, cmap="icefire", ax=ax_ht)
             ax_ht.set_title("7. Feature Correlation (Seaborn Heatmap)", color="white")
             st.pyplot(fig_heat_seaborn)
+            plt.close(fig_heat_seaborn)
             st.markdown("---")
             
             # Line plot Matplotlib (MANDATORY FOR GRADING)
@@ -349,6 +357,7 @@ with tab2:
             ax_ln.plot(range(len(sorted_df)), sorted_df['word_count'].cumsum(), marker="o", color="#ff5722")
             ax_ln.set_title("8. Cumulative Progression Tracker (Matplotlib)", color="white")
             st.pyplot(fig_line_seaborn)
+            plt.close(fig_line_seaborn)
             st.markdown("---")
             
             # Count Plot Seaborn (MANDATORY FOR GRADING)
@@ -356,6 +365,7 @@ with tab2:
             sns.countplot(data=filtered_df, y='newsgroup', ax=ax_ct, palette="crest")
             ax_ct.set_title("9. Domain Post Density Map (Seaborn Count Plot)", color="white")
             st.pyplot(fig_count_seaborn)
+            plt.close(fig_count_seaborn)
             st.markdown("---")
             
             # Violin Plot Seaborn (MANDATORY FOR GRADING)
@@ -363,6 +373,7 @@ with tab2:
             sns.violinplot(data=filtered_df, x='text_length', y='newsgroup', ax=ax_vl, palette="pastel", inner="quartile")
             ax_vl.set_title("10. Probability Density (Seaborn Violin Plot)", color="white")
             st.pyplot(fig_violin_seaborn)
+            plt.close(fig_violin_seaborn)
             
         else:
             # PLOTLY INTERACTIVE AND ZOOMABLE CHARTS (5 to 10)
@@ -405,7 +416,7 @@ with tab2:
             # 9. Domain Post Density (Plotly - FULLY ZOOMABLE & VERSION COMPATIBLE)
             st.markdown("#### 9. Domain Post Density Distribution Map (Count Plot)")
             cg_counts = filtered_df['newsgroup'].value_counts()
-            count_data = pd.DataFrame({'newsgroup': cg_counts.index, 'count': cg_counts.values})
+            count_data = pd.DataFrame({'newsgroup': cg_counts.index.tolist(), 'count': cg_counts.values.tolist()})
             fig_count = px.bar(count_data, x='count', y='newsgroup', orientation='h', color='newsgroup', title="Category density comparisons")
             fig_count.update_layout(template="plotly_dark", paper_bgcolor="#161b22", plot_bgcolor="#161b22", showlegend=False)
             st.plotly_chart(fig_count, use_container_width=True)
