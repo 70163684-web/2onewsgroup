@@ -4,12 +4,11 @@ import pandas as pd
 
 def load_and_process_corpus(tar_path="20news-bydate.tar"):
     """
-    Highly secure streaming archive parser. Auto-detects structures,
-    preprocesses tokens, and engineers advanced linguistic features over complete data.
+    Highly secure streaming archive parser. Processes the full dataset and 
+    engineers 10 distinct mathematical data structures for graphs and tables.
     """
     parsed_data = []
     
-    # Try multiple reading formats fallback paths
     try:
         tar = tarfile.open(tar_path, "r:")
     except Exception:
@@ -33,7 +32,6 @@ def load_and_process_corpus(tar_path="20news-bydate.tar"):
                     if f is not None:
                         raw_content = f.read().decode('utf-8', errors='ignore')
                         
-                        # High-speed token feature tracking regex
                         subject_search = re.search(r'^Subject:\s*(.*)$', raw_content, re.MULTILINE | re.IGNORECASE)
                         lines_search = re.search(r'^Lines:\s*(\d+)$', raw_content, re.MULTILINE | re.IGNORECASE)
                         org_search = re.search(r'^Organization:\s*(.*)$', raw_content, re.MULTILINE | re.IGNORECASE)
@@ -62,18 +60,18 @@ def load_and_process_corpus(tar_path="20news-bydate.tar"):
         
     df = pd.DataFrame(parsed_data)
     
-    # Text token standard preprocessing pipelines
+    # Text Preprocessing Pipeline
     df['CleanText'] = df['RawText'].str.lower()
     df['CleanText'] = df['CleanText'].apply(lambda x: re.sub(r'[^\w\s]', ' ', str(x))) 
     df['CleanText'] = df['CleanText'].apply(lambda x: re.sub(r'\d+', '', str(x)))      
     df['CleanText'] = df['CleanText'].apply(lambda x: re.sub(r'\s+', ' ', str(x)).strip())
     
-    # Feature matrices engineering
+    # Statistical Calculations
     df['WordCount'] = df['CleanText'].apply(lambda x: len(x.split()))
     df['CharCount'] = df['CleanText'].apply(lambda x: len(x))
     df['AvgWordLength'] = df.apply(lambda row: row['CharCount'] / row['WordCount'] if row['WordCount'] > 0 else 0, axis=1)
     
-    # Multi-rule keyword model tagging
+    # Rule-Based Sentiment Analysis
     pos_words = {'good', 'great', 'excellent', 'agree', 'right', 'support', 'true', 'thanks', 'benefit', 'solve'}
     neg_words = {'bad', 'wrong', 'error', 'fail', 'problem', 'severe', 'claim', 'disagree', 'attack', 'kill'}
     
@@ -88,21 +86,9 @@ def load_and_process_corpus(tar_path="20news-bydate.tar"):
     return df[df['WordCount'] >= 1].reset_index(drop=True)
 
 def extract_advanced_vocabulary(df):
-    """Calculates frequency distribution metrics for active documents arrays cleanly."""
+    """Extracts top words for the NLP plots section."""
     if df.empty or 'CleanText' not in df.columns:
         return pd.DataFrame(columns=['Word', 'Frequency'])
         
     base_stopwords = {
-        'the', 'and', 'of', 'to', 'is', 'in', 'for', 'on', 'with', 'a', 'an', 'this', 'are', 
-        'or', 'at', 'from', 'it', 'that', 'by', 'be', 'as', 'was', 'have', 'not', 'but', 'you', 'i', 'he', 'they'
-    }
-    
-    token_frequencies = {}
-    for passage in df['CleanText'].head(1500):  
-        tokens = str(passage).split()
-        for token in tokens:
-            if token not in base_stopwords and len(token) > 4:
-                token_frequencies[token] = token_frequencies.get(token, 0) + 1
-                
-    sorted_tokens = sorted(token_frequencies.items(), key=lambda x: x[1], reverse=True)
-    return pd.DataFrame(sorted_tokens, columns=['Word', 'Frequency']).head(15)
+        'the', 'and', 'of', 'to', 'is', 'in', 'for', 'on', 'with', 'a', 'an', 'this', 'are',
