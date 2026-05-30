@@ -14,7 +14,7 @@ st.set_page_config(
 
 sns.set_theme(style="whitegrid")
 
-# Dataset dynamic alignment track
+# Dataset dynamic target detection
 target_file = "20news-bydate.tar"
 if not os.path.exists(target_file) and os.path.exists("20news-bydate.tar.gz"):
     target_file = "20news-bydate.tar.gz"
@@ -23,16 +23,16 @@ if not os.path.exists(target_file) and os.path.exists("20news-bydate.tar.gz"):
 def get_processed_data(file_path):
     return load_and_process_corpus(file_path)
 
-with st.spinner("Streaming full dataset vectors and computing metrics matrix..."):
+with st.spinner("Compiling full dataset metrics and deploying arrays..."):
     master_df = get_processed_data(target_file)
 
 st.markdown("<h1 style='color: #0F172A; font-weight:800; margin-bottom:0;'>⚡ 20 Newsgroups 10-Point Advanced Analytics Platform</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color: #475569; font-size:14px; margin-bottom:25px;'>Premium high-grade visualization framework tracking structural properties across full repository layers.</p>", unsafe_allow_html=True)
+st.markdown("<p style='color: #475569; font-size:14px; margin-bottom:25px;'>Premium visualization framework charting structural matrices across complete data boundaries.</p>", unsafe_allow_html=True)
 
 if master_df.empty or "WordCount" not in master_df.columns:
     st.error(f"🚨 Initialization Failed! File repository structure dropped inside '{target_file}'.")
 else:
-    # --- INTERACTIVE WORKSPACE PANEL ---
+    # --- SIDEBAR WORKSPACE FILTERS PANEL ---
     st.sidebar.markdown("### 🛠️ Workspace Controls")
     st.sidebar.markdown("---")
     
@@ -58,7 +58,7 @@ else:
 
     search_input = st.sidebar.text_input("🔍 Raw Token Pattern Lookup:")
 
-    # Execute Filters Constraints
+    # Apply Filter Constraints
     filtered_df = step_df.copy()
     if chosen_category != "All Categories":
         filtered_df = filtered_df[filtered_df['Category'] == chosen_category]
@@ -70,10 +70,9 @@ else:
     if search_input:
         filtered_df = filtered_df[filtered_df['CleanText'].str.contains(search_input, case=False)]
 
-    # --- THE 10 SCORECARD KPI POINT CORE HEADERS ---
+    # --- THE 10 KPI SCORE SCORECARD WIDGETS ---
     st.markdown("##### 📌 Core Summary Scorecard Metrics (10 Mandatory Evaluation Points)")
     
-    # Row 1 (Points 1 - 5)
     r1_1, r1_2, r1_3, r1_4, r1_5 = st.columns(5)
     with r1_1:
         st.metric(label="1. Total Full Dataset Vol", value=f"{len(master_df):,}")
@@ -88,7 +87,6 @@ else:
         max_w = filtered_df['WordCount'].max() if not filtered_df.empty else 0
         st.metric(label="5. Maximum Word Peak Cap", value=f"{max_w:,}")
 
-    # Row 2 (Points 6 - 10)
     r2_1, r2_2, r2_3, r2_4, r2_5 = st.columns(5)
     with r2_1:
         total_lines = filtered_df['Lines'].sum() if not filtered_df.empty else 0
@@ -109,50 +107,47 @@ else:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # --- ADVANCED NATIVE TABS WORKSPACE FRAMEWORK ---
+    # --- NATIVE CONTAINER TABS WITH INTEGRATED HEIGHT SCROLLBARS ---
     tab_plots, tab_tables, tab_master = st.tabs([
         "📊 Tab 1: 10-Point Parameters Core Plots Engine", 
         "📈 Tab 2: 10-Point Metrics Dynamic Structured Tables", 
         "🗃 Tab 3: Complete Dataset Ledger Grid"
     ])
 
-    # --- TAB 1: PLOTS FOR ALL 10 PARAMETERS ---
+    # --- TAB 1: PLOTS FOR ALL 10 PARAMETERS (WITH HEIGHT SCROLL ISOLATION) ---
     with tab_plots:
         st.markdown("### 📊 High-Resolution Visual Plots Mapping the 10 KPI Core Points")
         
-        # Row 1 of Plots
         p_col1, p_col2 = st.columns(2)
         with p_col1:
             st.markdown("##### 📈 Plot A: Class Abundance Volume (Maps Point 1, 2, 3 & 9)")
-            with st.container(height=380):
+            with st.container(height=390):
                 if not filtered_df.empty:
-                    fig1, ax1 = plt.subplots(figsize=(7, 4.5))
+                    fig1, ax1 = plt.subplots(figsize=(7, 5))
                     cat_counts = filtered_df['Category'].value_counts()
                     sns.barplot(x=cat_counts.values, y=cat_counts.index, palette="viridis", ax=ax1)
                     ax1.set_xlabel("Documents Vector Counts")
-                    ax1.set_ylabel("Class Label Categories")
                     plt.tight_layout()
                     st.pyplot(fig1)
                     plt.close(fig1)
         with p_col2:
             st.markdown("##### 🔠 Plot B: NLP Primary Key Vocabulary Densities (Maps Point 4, 5 & 8)")
-            with st.container(height=380):
+            with st.container(height=390):
                 vocab_data = extract_advanced_vocabulary(filtered_df)
                 if not vocab_data.empty:
-                    fig2, ax2 = plt.subplots(figsize=(7, 4.5))
+                    fig2, ax2 = plt.subplots(figsize=(7, 5))
                     sns.barplot(data=vocab_data, x='Frequency', y='Word', palette="flare", ax=ax2)
                     ax2.set_xlabel("Token Magnitude Distribution")
                     plt.tight_layout()
                     st.pyplot(fig2)
                     plt.close(fig2)
 
-        # Row 2 of Plots
         p_col3, p_col4 = st.columns(2)
         with p_col3:
             st.markdown("##### 🧬 Plot C: Structural Text Lengths & Dispersion Outliers (Maps Point 4, 5 & 7)")
-            with st.container(height=380):
+            with st.container(height=390):
                 if not filtered_df.empty:
-                    fig3, ax3 = plt.subplots(figsize=(7, 4.5))
+                    fig3, ax3 = plt.subplots(figsize=(7, 5))
                     sns.boxplot(data=filtered_df, x='WordCount', y='Category', palette="Set2", ax=ax3)
                     ax3.set_xlabel("Word Length Distributions Metrics")
                     plt.tight_layout()
@@ -160,7 +155,7 @@ else:
                     plt.close(fig3)
         with p_col4:
             st.markdown("##### 🎭 Plot D: Advanced Language Sentiment Spectrum Ratios (Maps Point 10)")
-            with st.container(height=380):
+            with st.container(height=390):
                 if not filtered_df.empty:
                     fig4, ax4 = plt.subplots(figsize=(6, 4))
                     sentiment_counts = filtered_df['SentimentScore'].value_counts()
@@ -170,39 +165,34 @@ else:
                     st.pyplot(fig4)
                     plt.close(fig4)
 
-    # --- TAB 2: TABLES FOR ALL 10 PARAMETERS ---
+    # --- TAB 2: NATIVE DATA TABLES BREAKDOWN FOR 10 PARAMETERS ---
     with tab_tables:
         st.markdown("### 📈 Dynamic Structured Tables Analysing the 10 Metric Core Points")
         
         if filtered_df.empty:
             st.caption("No data records available to compile structures.")
         else:
-            # Table 1: Category Statistics
             st.markdown("##### 📋 Table Section A: 10-Point Category Distribution Statistics Matrix")
-            with st.container(height=240):
-                cat_summary = filtered_df.groupby('Category').agg(
-                    Document_Count=('Subject', 'count'),
-                    Avg_Word_Count=('WordCount', 'mean'),
-                    Max_Word_Count=('WordCount', 'max'),
-                    Total_Text_Lines=('Lines', 'sum'),
-                    Avg_Text_Lines=('Lines', 'mean'),
-                    Unique_Organizations=('Organization', 'nunique')
-                ).reset_index()
-                st.dataframe(cat_summary, use_container_width=True)
+            cat_summary = filtered_df.groupby('Category').agg(
+                Document_Count=('Subject', 'count'),
+                Avg_Word_Count=('WordCount', 'mean'),
+                Max_Word_Count=('WordCount', 'max'),
+                Total_Text_Lines=('Lines', 'sum'),
+                Avg_Text_Lines=('Lines', 'mean'),
+                Unique_Organizations=('Organization', 'nunique')
+            ).reset_index()
+            st.dataframe(cat_summary, use_container_width=True, height=250)
                 
-            # Table 2: Partition & Sentiment Breakdown
             st.markdown("<br>##### 📋 Table Section B: Partition Splitting & Sentiment Distribution Tracking", unsafe_allow_html=True)
             t_c1, t_c2 = st.columns(2)
             with t_c1:
                 st.markdown("<p style='font-size:12px;'>Data Volume Shares (Points 1, 2)</p>", unsafe_allow_html=True)
-                with st.container(height=180):
-                    split_summary = filtered_df.groupby('Split').size().reset_index(name='Total Documents Count Mapping')
-                    st.dataframe(split_summary, use_container_width=True)
+                split_summary = filtered_df.groupby('Split').size().reset_index(name='Total Documents Count Mapping')
+                st.dataframe(split_summary, use_container_width=True, height=180)
             with t_c2:
                 st.markdown("<p style='font-size:12px;'>Rule-Based NLP Values Distribution (Point 10)</p>", unsafe_allow_html=True)
-                with st.container(height=180):
-                    senti_summary = filtered_df.groupby('SentimentScore').size().reset_index(name='Document Target Frequencies')
-                    st.dataframe(senti_summary, use_container_width=True)
+                senti_summary = filtered_df.groupby('SentimentScore').size().reset_index(name='Document Target Frequencies')
+                st.dataframe(senti_summary, use_container_width=True, height=180)
 
     # --- TAB 3: COMPLETE DATASET LEDGER GRID ---
     with tab_master:
