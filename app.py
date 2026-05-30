@@ -1,3 +1,4 @@
+```python
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -18,7 +19,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom neon CSS to perfectly mimic high-end interactive apps from the video
+# Custom neon CSS to perfectly mimic high-end interactive apps from your reference video
 st.markdown("""
     <style>
     .main { background-color: #0d1117; color: #ffffff; }
@@ -55,25 +56,25 @@ st.markdown("""
 def apply_filters(df, selected_categories, length_range, score_range, search_query):
     filtered_df = df.copy()
     
-    # Category Filter
+    # 1. Category Filter
     if selected_categories and 'newsgroup' in filtered_df.columns:
         filtered_df = filtered_df[filtered_df['newsgroup'].isin(selected_categories)]
         
-    # Text Length Filter (Starts exactly from 0)
+    # 2. Text Length Filter (Starts exactly from 0)
     if 'text_length' in filtered_df.columns:
         filtered_df = filtered_df[
             (filtered_df['text_length'] >= length_range[0]) & 
             (filtered_df['text_length'] <= length_range[1])
         ]
         
-    # Sentiment Score Filter (-1.0 to +1.0)
+    # 3. Sentiment Score Filter (-1.0 to +1.0)
     if 'sentiment_score' in filtered_df.columns:
         filtered_df = filtered_df[
             (filtered_df['sentiment_score'] >= score_range[0]) & 
             (filtered_df['sentiment_score'] <= score_range[1])
         ]
         
-    # Global Keyword Text Search Filter
+    # 4. Global Keyword Text Search Filter
     if search_query and 'text' in filtered_df.columns:
         filtered_df = filtered_df[filtered_df['text'].str.contains(search_query, case=False, na=False)]
         
@@ -87,7 +88,7 @@ def load_and_process_dataset():
     tar_path = "20news-bydate.tar.gz"
     alternative_tar = "20news-bydate.tar"
     
-    # Modern Mental Health mapping
+    # Modern Psychological & Mental Health domains mapping
     category_mapping = {
         'sci.space': 'Academic Burnout & Peer Pressure',
         'comp.sys.mac.hardware': 'Digital Overload & Cyber Fatigue',
@@ -138,16 +139,11 @@ def load_and_process_dataset():
                                 sentiment = (pos_c - neg_c) / (pos_c + neg_c + 1)
                                 sentiment = max(-1.0, min(1.0, sentiment))
                                 
-                                if sentiment <= -0.4: 
-                                    cat = "Critical Distress"
-                                elif sentiment <= -0.1: 
-                                    cat = "Mildly Negative"
-                                elif sentiment <= 0.2: 
-                                    cat = "Neutral / Observational"
-                                elif sentiment <= 0.5: 
-                                    cat = "Seeking Hope / Optimistic"
-                                else: 
-                                    cat = "Positive Recovery Status"
+                                if sentiment <= -0.4: cat = "Critical Distress"
+                                elif sentiment <= -0.1: cat = "Mildly Negative"
+                                elif sentiment <= 0.2: cat = "Neutral / Observational"
+                                elif sentiment <= 0.5: cat = "Seeking Hope / Optimistic"
+                                else: cat = "Positive Recovery Status"
                                 
                                 all_data.append({
                                     'article_id': int(file_id) if file_id.isdigit() else np.random.randint(1000, 5000),
@@ -229,8 +225,14 @@ search_query = st.sidebar.text_input("Search Description Keywords:")
 st.sidebar.markdown("---")
 grading_mode = st.sidebar.checkbox("⭐ Show Seaborn/Matplotlib Plots (For Grading)", value=False)
 
-# Filter execution
-filtered_df = apply_filters(df, selected_classes, slider_lengths, slider_sentiments, search_query)
+# Filter execution (Fixes the positional argument mismatch error)
+filtered_df = apply_filters(
+    df=df,
+    selected_categories=selected_classes,
+    length_range=slider_lengths,
+    score_range=slider_sentiments,
+    search_query=search_query
+)
 
 if st.sidebar.button("Reset Configuration Parameters"):
     st.session_state.clear()
