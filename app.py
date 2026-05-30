@@ -33,7 +33,7 @@ st.markdown("""
         color: #1f77b4;
     }
     </style>
-    """, unsafe_style_code=True)
+    """, unsafe_allow_html=True) # Yahan error ko fix kar diya gaya hai (unsafe_allow_html)
 
 # --- DATA LOADING & CACHING ---
 # 20 Newsgroups tar.gz dataset ko load aur extract karne ka function
@@ -149,7 +149,7 @@ m1, m2 = st.columns(2)
 # Metric 1: Total Full Database Size
 m1.metric("1. TOTAL FULL DATABASE SIZE", f"{total_database_len:,}")
 
-# Metric 2: Active Filtered Subset (PEHLE WALRUS OPERATOR WALA ERROR THA, AB BILKUL FIX HAI)
+# Metric 2: Active Filtered Subset
 active_sub_val = active_len
 m2.metric("2. Active Filtered Subset", f"{active_sub_val:,}")
 
