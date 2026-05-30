@@ -5,8 +5,8 @@ import numpy as np
 
 def load_and_process_corpus(tar_path="20news-bydate.tar"):
     """
-    Highly secure streaming archive parser. Robustly extracts structural properties,
-    and dynamically increases data partitions for deep academic visualization workflows.
+    Highly secure streaming archive parser. Robustly extracts structural properties 
+    and handles files missing metadata cleanly to guarantee zero crashes.
     """
     parsed_data = []
     
@@ -19,7 +19,7 @@ def load_and_process_corpus(tar_path="20news-bydate.tar"):
             try:
                 tar = tarfile.open("20news-bydate.tar.gz", "r:gz")
             except Exception:
-                return pd.DataFrame(columns=["Split", "Category", "Subject", "Lines", "Organization", "RawText", "CleanText", "WordCount", "CharCount", "AvgWordLength", "SentimentScore", "LinguisticPartition"])
+                return pd.DataFrame(columns=["Split", "Category", "Subject", "Lines", "Organization", "RawText", "CleanText", "WordCount", "CharCount", "AvgWordLength", "SentimentScore"])
 
     try:
         for member in tar.getmembers():
@@ -57,32 +57,28 @@ def load_and_process_corpus(tar_path="20news-bydate.tar"):
         pass
 
     if not parsed_data:
-        return pd.DataFrame(columns=["Split", "Category", "Subject", "Lines", "Organization", "RawText", "CleanText", "WordCount", "CharCount", "AvgWordLength", "SentimentScore", "LinguisticPartition"])
+        return pd.DataFrame(columns=["Split", "Category", "Subject", "Lines", "Organization", "RawText", "CleanText", "WordCount", "CharCount", "AvgWordLength", "SentimentScore"])
         
     df = pd.DataFrame(parsed_data)
     
-    # Text Data Cleaning Pipeline
     df['CleanText'] = df['RawText'].str.lower()
     df['CleanText'] = df['CleanText'].apply(lambda x: re.sub(r'[^\w\s]', ' ', str(x))) 
     df['CleanText'] = df['CleanText'].apply(lambda x: re.sub(r'\d+', '', str(x)))      
     df['CleanText'] = df['CleanText'].apply(lambda x: re.sub(r'\s+', ' ', str(x)).strip())
     
-    # Statistical Vector Matrix Calculations
     df['WordCount'] = df['CleanText'].apply(lambda x: len(x.split()))
     df['CharCount'] = df['CleanText'].apply(lambda x: len(x))
     df['AvgWordLength'] = df.apply(lambda row: row['CharCount'] / row['WordCount'] if row['WordCount'] > 0 else 0, axis=1)
     
-    # --- INCREASED DATASET PARTITIONS CORE ENGINE ---
-    # Standard splits ko dynamic analytical partitions (4 logical quadrants) mein upgrade kar diya hai
+    # Increased Data Partition Engine
     def segment_partitions(row):
         if row['BaseSplit'] == "Train Split":
-            return "Train (Standard Vol)" if row['WordCount'] < 250 else "Train (Dense Matrix)"
+            return "Train Split (Standard Vol)" if row['WordCount'] < 250 else "Train Split (Dense Matrix)"
         else:
-            return "Test (Standard Vol)" if row['WordCount'] < 250 else "Test (Dense Matrix)"
+            return "Test Split (Standard Vol)" if row['WordCount'] < 250 else "Test Split (Dense Matrix)"
             
     df['Split'] = df.apply(segment_partitions, axis=1)
     
-    # Rule-Based NLP Sentiment Tagger
     pos_words = {'good', 'great', 'excellent', 'agree', 'right', 'support', 'true', 'thanks', 'benefit', 'solve'}
     neg_words = {'bad', 'wrong', 'error', 'fail', 'problem', 'severe', 'claim', 'disagree', 'attack', 'kill'}
     
@@ -97,7 +93,6 @@ def load_and_process_corpus(tar_path="20news-bydate.tar"):
     return df[df['WordCount'] >= 1].reset_index(drop=True)
 
 def extract_advanced_vocabulary(df):
-    """Safely isolates primary active token counts for individual metrics visualization boxes."""
     if df.empty or 'CleanText' not in df.columns:
         return pd.DataFrame(columns=['Word', 'Frequency'])
         
@@ -113,4 +108,4 @@ def extract_advanced_vocabulary(df):
             if token not in base_stopwords and len(token) > 4:
                 token_frequencies[token] = token_frequencies.get(token, 0) + 1
                 
-    return pd.DataFrame(sorted(token_frequencies.items(), key=lambda x: x[1], reverse=True), columns=['Word', 'Frequency']).head(10)
+    return pd.DataFrame(sorted(token_frequencies.items(), key=lambda x: x[1], reverse=True), columns=['Word', 'Frequency']).head(12)
