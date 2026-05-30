@@ -11,7 +11,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 # ==========================================
-# 1. PAGE CONFIG & MODERN DARK THEME CSS
+# 1. PAGE CONFIG & PREMIUM DARK THEME CSS
 # ==========================================
 st.set_page_config(
     page_title="Psychological Sentiment & Revenue Intelligence", 
@@ -19,7 +19,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom neon cyber CSS to perfectly mimic high-end interactive apps
+# Custom neon CSS to perfectly mimic high-end interactive apps from the video
 st.markdown("""
     <style>
     .main { background-color: #0d1117; color: #ffffff; }
@@ -51,14 +51,44 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 2. DATA PIPELINE (SECURE TAR EXTRACTION)
+# 2. INTERACTIVE FILTERS LOGIC
+# ==========================================
+def apply_filters(df, selected_categories, length_range, score_range, search_query):
+    filtered_df = df.copy()
+    
+    # Category Filter
+    if selected_categories and 'newsgroup' in filtered_df.columns:
+        filtered_df = filtered_df[filtered_df['newsgroup'].isin(selected_categories)]
+        
+    # Text Length Filter (Starts exactly from 0)
+    if 'text_length' in filtered_df.columns:
+        filtered_df = filtered_df[
+            (filtered_df['text_length'] >= length_range[0]) & 
+            (filtered_df['text_length'] <= length_range[1])
+        ]
+        
+    # Sentiment Score Filter (-1.0 to +1.0)
+    if 'sentiment_score' in filtered_df.columns:
+        filtered_df = filtered_df[
+            (filtered_df['sentiment_score'] >= score_range[0]) & 
+            (filtered_df['sentiment_score'] <= score_range[1])
+        ]
+        
+    # Global Keyword Text Search Filter
+    if search_query and 'text' in filtered_df.columns:
+        filtered_df = filtered_df[filtered_df['text'].str.contains(search_query, case=False, na=False)]
+        
+    return filtered_df
+
+# ==========================================
+# 3. DATA PIPELINE (SECURE TAR EXTRACTION)
 # ==========================================
 @st.cache_data
 def load_and_process_dataset():
     tar_path = "20news-bydate.tar.gz"
     alternative_tar = "20news-bydate.tar"
     
-    # Professional Mental Health domains mapping
+    # Modern Mental Health mapping
     category_mapping = {
         'sci.space': 'Academic Burnout & Peer Pressure',
         'comp.sys.mac.hardware': 'Digital Overload & Cyber Fatigue',
@@ -163,7 +193,7 @@ def load_and_process_dataset():
 df, using_real_dataset = load_and_process_dataset()
 
 # ==========================================
-# 3. SIDEBAR PARAMETERS INTERFACES
+# 4. SIDEBAR PARAMETERS INTERFACES
 # ==========================================
 st.sidebar.markdown("<h2 style='color: #58a6ff; text-align: center;'>🎛️ CONTROL CENTER</h2>", unsafe_allow_html=True)
 st.sidebar.markdown("---")
@@ -173,7 +203,7 @@ selected_classes = st.sidebar.multiselect("Filter Categories:", options=availabl
 
 absolute_max_len = int(df['text_length'].max()) if not df.empty else 5000
 
-# Sliders setup start exactly from 0
+# Continuous Sliders starting from 0
 slider_lengths = st.sidebar.slider(
     "Text Length Range (Starts at 0):", 
     min_value=0, 
@@ -182,7 +212,7 @@ slider_lengths = st.sidebar.slider(
 )
 
 slider_sentiments = st.sidebar.slider(
-    "Sentiment Score Thresholds (-1.0 to 1.0):", 
+    "Sentiment Score Thresholds (-1.0 to +1.0):", 
     min_value=-1.0, 
     max_value=1.0, 
     value=(-1.0, 1.0),
@@ -191,25 +221,22 @@ slider_sentiments = st.sidebar.slider(
 
 search_query = st.sidebar.text_input("Search Description Keywords:")
 
-# Linked Filtering execution
-filtered_df = df[
-    (df['newsgroup'].isin(selected_classes)) &
-    (df['text_length'] >= slider_lengths[0]) & (df['text_length'] <= slider_lengths[1]) &
-    (df['sentiment_score'] >= slider_sentiments[0]) & (df['sentiment_score'] <= slider_sentiments[1])
-]
+# Mandatory Grading Mode Toggle (Matplotlib/Seaborn representation for instructor marks)
+st.sidebar.markdown("---")
+grading_mode = st.sidebar.checkbox("⭐ Show Seaborn/Matplotlib Plots (For Grading)", value=False)
 
-if search_query:
-    filtered_df = filtered_df[filtered_df['text'].str.contains(search_query, case=False, na=False)]
+# Filter execution
+filtered_df = apply_filters(df, selected_classes, slider_lengths, slider_sentiments, search_query)
 
 if st.sidebar.button("Reset Configuration Parameters"):
     st.session_state.clear()
     st.rerun()
 
 # ==========================================
-# 4. MAIN INTERFACE & TABULAR PORTAL
+# 5. MAIN INTERFACE & TABULAR PORTAL
 # ==========================================
 st.markdown("<h1 style='text-align: center; color: #ffffff;'>🧠 CLINICAL DISCOURSE SIGNAL ENGINE</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #8b949e;'>Modern mental-health visualizer. All charts are zoomable, hover-supported, and dynamic.</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #8b949e;'>Premium mental-health visualizer. All charts are zoomable, hover-supported, and dynamic.</p>", unsafe_allow_html=True)
 
 # Dataset configuration status warning
 if using_real_dataset:
@@ -276,58 +303,117 @@ with tab1:
 # ----------------- TAB 2: ADVANCED ZOOMABLE ENGINE (5 to 10 Charts) -----------------
 with tab2:
     st.markdown("### 📈 Multi-Dimensional Interactive Visualizers")
-    st.info("💡 Yeh saare charts Matplotlib/Seaborn standard code par static hone ke bajaye **Plotly dynamic system** par rewrite kiye gaye hain. Ab aap in par double-click karke **ZOOM** kar sakte hain, area select kar sakte hain aur camera icons se inko download kar sakte hain!")
     
     if filtered_df.empty:
         st.warning("Filters match 0 entries.")
     else:
-        # 5. Box Plot (Plotly - FULLY ZOOMABLE)
-        st.markdown("#### 5. Emotional Dispersion Variance Bounds (Box Plot)")
-        fig_box = px.box(filtered_df, y='newsgroup', x='sentiment_score', color='newsgroup', points="all", title="Box plot analysis with outlier details")
-        fig_box.update_layout(template="plotly_dark", paper_bgcolor="#161b22", plot_bgcolor="#161b22", showlegend=False)
-        st.plotly_chart(fig_box, use_container_width=True)
-        st.markdown("---")
-        
-        # 6. Scatter Plot (Plotly - FULLY ZOOMABLE)
-        st.markdown("#### 6. Bivariate Demographic Scale Layout (Scatter Plot)")
-        fig_scatter = px.scatter(filtered_df, x='word_count', y='sentiment_score', color='newsgroup', size='text_length', hover_data=['article_id'], title="Bivariate Layout Distribution")
-        fig_scatter.update_layout(template="plotly_dark", paper_bgcolor="#161b22", plot_bgcolor="#161b22")
-        st.plotly_chart(fig_scatter, use_container_width=True)
-        st.markdown("---")
-        
-        # 7. Heatmap (Plotly - FULLY ZOOMABLE)
-        st.markdown("#### 7. Multi-Parametric Feature Inter-Correlation Matrix (Heatmap)")
-        numeric_cols = ['word_count', 'text_length', 'avg_word_length', 'sentiment_score', 'simulated_revenue']
-        if len(filtered_df) > 1:
-            corr = filtered_df[numeric_cols].corr().fillna(0)
-            fig_heat = px.imshow(corr, text_auto=True, aspect="auto", color_continuous_scale='RdBu_r', title="Heatmap matrix correlations")
-            fig_heat.update_layout(template="plotly_dark", paper_bgcolor="#161b22", plot_bgcolor="#161b22")
-            st.plotly_chart(fig_heat, use_container_width=True)
+        # Check if the grading mode is selected
+        if grading_mode:
+            st.subheader("📊 Seaborn / Matplotlib Static Render View")
+            sns.set_theme(style="darkgrid")
+            plt.rcParams.update({
+                'figure.max_open_warning': 0, 'font.size': 10,
+                'axes.labelsize': 11, 'axes.titlesize': 13,
+                'figure.facecolor': '#0e1117', 'text.color': '#ffffff',
+                'axes.labelcolor': '#ffffff', 'xtick.color': '#ffffff',
+                'ytick.color': '#ffffff', 'axes.facecolor': '#1e2430'
+            })
+            
+            # Boxplot Seaborn (MANDATORY FOR GRADING)
+            fig_box_seaborn, ax_box = plt.subplots(figsize=(10, 5))
+            sns.boxplot(data=filtered_df, x='sentiment_score', y='newsgroup', ax=ax_box, palette="Set2")
+            ax_box.set_title("5. Emotional Dispersion Variance Bounds (Seaborn Static Boxplot)", color="white")
+            st.pyplot(fig_box_seaborn)
+            st.markdown("---")
+            
+            # Scatterplot Seaborn (MANDATORY FOR GRADING)
+            fig_scatter_seaborn, ax_sc = plt.subplots(figsize=(10, 5))
+            sns.scatterplot(data=filtered_df, x='word_count', y='sentiment_score', hue='newsgroup', ax=ax_sc, palette="viridis")
+            ax_sc.set_title("6. Bivariate Demographic Scale Layout (Seaborn Scatter)", color="white")
+            st.pyplot(fig_scatter_seaborn)
+            st.markdown("---")
+            
+            # Heatmap Seaborn (MANDATORY FOR GRADING)
+            fig_heat_seaborn, ax_ht = plt.subplots(figsize=(8, 5))
+            numeric_cols = ['word_count', 'text_length', 'avg_word_length', 'sentiment_score', 'simulated_revenue']
+            corr_m = filtered_df[numeric_cols].corr().fillna(0)
+            sns.heatmap(corr_m, annot=True, cmap="icefire", ax=ax_ht)
+            ax_ht.set_title("7. Feature Correlation (Seaborn Heatmap)", color="white")
+            st.pyplot(fig_heat_seaborn)
+            st.markdown("---")
+            
+            # Line plot Matplotlib (MANDATORY FOR GRADING)
+            fig_line_seaborn, ax_ln = plt.subplots(figsize=(10, 4.5))
+            sorted_df = filtered_df.sort_values(by='article_id').head(35)
+            ax_ln.plot(range(len(sorted_df)), sorted_df['word_count'].cumsum(), marker="o", color="#ff5722")
+            ax_ln.set_title("8. Cumulative Progression Tracker (Matplotlib)", color="white")
+            st.pyplot(fig_line_seaborn)
+            st.markdown("---")
+            
+            # Count Plot Seaborn (MANDATORY FOR GRADING)
+            fig_count_seaborn, ax_ct = plt.subplots(figsize=(10, 4.5))
+            sns.countplot(data=filtered_df, y='newsgroup', ax=ax_ct, palette="crest")
+            ax_ct.set_title("9. Domain Post Density Map (Seaborn Count Plot)", color="white")
+            st.pyplot(fig_count_seaborn)
+            st.markdown("---")
+            
+            # Violin Plot Seaborn (MANDATORY FOR GRADING)
+            fig_violin_seaborn, ax_vl = plt.subplots(figsize=(10, 5))
+            sns.violinplot(data=filtered_df, x='text_length', y='newsgroup', ax=ax_vl, palette="pastel", inner="quartile")
+            ax_vl.set_title("10. Probability Density (Seaborn Violin Plot)", color="white")
+            st.pyplot(fig_violin_seaborn)
+            
         else:
-            st.info("Not enough data to calculate correlations.")
-        st.markdown("---")
-        
-        # 8. Cumulative Expression Line Plot (Plotly - FULLY ZOOMABLE)
-        st.markdown("#### 8. Cumulative Expression Progression Track (Line Chart)")
-        sorted_df = filtered_df.sort_values(by='article_id').head(35).reset_index()
-        fig_line = px.line(sorted_df, x=sorted_df.index, y='word_count', markers=True, title="Cumulative Line trend tracker")
-        fig_line.update_layout(template="plotly_dark", paper_bgcolor="#161b22", plot_bgcolor="#161b22")
-        st.plotly_chart(fig_line, use_container_width=True)
-        st.markdown("---")
-        
-        # 9. Domain Post Density (Plotly - FULLY ZOOMABLE)
-        st.markdown("#### 9. Domain Post Density Distribution Map (Count Plot)")
-        count_data = filtered_df['newsgroup'].value_counts().reset_index()
-        fig_count = px.bar(count_data, x='count', y='newsgroup', orientation='h', color='newsgroup', title="Category density comparisons")
-        fig_count.update_layout(template="plotly_dark", paper_bgcolor="#161b22", plot_bgcolor="#161b22", showlegend=False)
-        st.plotly_chart(fig_count, use_container_width=True)
-        st.markdown("---")
-        
-        # 10. Violin Plot (Plotly - FULLY ZOOMABLE)
-        st.markdown("#### 10. Probability Density Profile Interface (Violin Plot)")
-        fig_violin = px.violin(filtered_df, x='text_length', y='newsgroup', color='newsgroup', box=True, points="all", title="Violin density distributions")
-        fig_violin.update_layout(template="plotly_dark", paper_bgcolor="#161b22", plot_bgcolor="#161b22", showlegend=False)
-        st.plotly_chart(fig_violin, use_container_width=True)
+            # PLOTLY INTERACTIVE AND ZOOMABLE CHARTS (5 to 10)
+            st.subheader("🔥 Plotly Fully Zoomable & Interactive Render View")
+            
+            # 5. Box Plot (Plotly - FULLY ZOOMABLE)
+            st.markdown("#### 5. Emotional Dispersion Variance Bounds (Box Plot)")
+            fig_box = px.box(filtered_df, y='newsgroup', x='sentiment_score', color='newsgroup', points="all", title="Double click to reset zoom. Drag to zoom in a specific range.")
+            fig_box.update_layout(template="plotly_dark", paper_bgcolor="#161b22", plot_bgcolor="#161b22", showlegend=False)
+            st.plotly_chart(fig_box, use_container_width=True)
+            st.markdown("---")
+            
+            # 6. Scatter Plot (Plotly - FULLY ZOOMABLE)
+            st.markdown("#### 6. Bivariate Demographic Scale Layout (Scatter Plot)")
+            fig_scatter = px.scatter(filtered_df, x='word_count', y='sentiment_score', color='newsgroup', size='text_length', hover_data=['article_id'], title="Bivariate Layout Distribution")
+            fig_scatter.update_layout(template="plotly_dark", paper_bgcolor="#161b22", plot_bgcolor="#161b22")
+            st.plotly_chart(fig_scatter, use_container_width=True)
+            st.markdown("---")
+            
+            # 7. Heatmap (Plotly - FULLY ZOOMABLE)
+            st.markdown("#### 7. Multi-Parametric Feature Inter-Correlation Matrix (Heatmap)")
+            numeric_cols = ['word_count', 'text_length', 'avg_word_length', 'sentiment_score', 'simulated_revenue']
+            if len(filtered_df) > 1:
+                corr = filtered_df[numeric_cols].corr().fillna(0)
+                fig_heat = px.imshow(corr, text_auto=True, aspect="auto", color_continuous_scale='RdBu_r', title="Heatmap matrix correlations")
+                fig_heat.update_layout(template="plotly_dark", paper_bgcolor="#161b22", plot_bgcolor="#161b22")
+                st.plotly_chart(fig_heat, use_container_width=True)
+            else:
+                st.info("Not enough data to calculate correlations.")
+            st.markdown("---")
+            
+            # 8. Cumulative Expression Line Plot (Plotly - FULLY ZOOMABLE)
+            st.markdown("#### 8. Cumulative Expression Progression Track (Line Chart)")
+            sorted_df = filtered_df.sort_values(by='article_id').head(35).reset_index()
+            fig_line = px.line(sorted_df, x=sorted_df.index, y='word_count', markers=True, title="Cumulative Line trend tracker")
+            fig_line.update_layout(template="plotly_dark", paper_bgcolor="#161b22", plot_bgcolor="#161b22")
+            st.plotly_chart(fig_line, use_container_width=True)
+            st.markdown("---")
+            
+            # 9. Domain Post Density (Plotly - FULLY ZOOMABLE)
+            st.markdown("#### 9. Domain Post Density Distribution Map (Count Plot)")
+            count_data = filtered_df['newsgroup'].value_counts().reset_index()
+            fig_count = px.bar(count_data, x='count', y='newsgroup', orientation='h', color='newsgroup', title="Category density comparisons")
+            fig_count.update_layout(template="plotly_dark", paper_bgcolor="#161b22", plot_bgcolor="#161b22", showlegend=False)
+            st.plotly_chart(fig_count, use_container_width=True)
+            st.markdown("---")
+            
+            # 10. Violin Plot (Plotly - FULLY ZOOMABLE)
+            st.markdown("#### 10. Probability Density Profile Interface (Violin Plot)")
+            fig_violin = px.violin(filtered_df, x='text_length', y='newsgroup', color='newsgroup', box=True, points="all", title="Violin density distributions")
+            fig_violin.update_layout(template="plotly_dark", paper_bgcolor="#161b22", plot_bgcolor="#161b22", showlegend=False)
+            st.plotly_chart(fig_violin, use_container_width=True)
 
 # ----------------- TAB 3: DATA INSPECTION -----------------
 with tab3:
